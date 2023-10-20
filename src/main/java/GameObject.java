@@ -36,7 +36,6 @@ public class GameObject {
         this(x, y, width, height, width, height, imagePath, passable, showHitbox);
     }
 
-    // Konstruktor für Testzwecke und manuelle Hitbox-Größe
     public GameObject(int x, int y, int width, int height, int hitboxWidth, int hitboxHeight, String imagePath, boolean passable, boolean showHitbox) {
         this.x = x;
         this.y = y;

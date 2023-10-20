@@ -14,9 +14,8 @@ public class Game extends JPanel implements ActionListener {
     public static GameState currentState;
 
                     //GameState Enum
-    //Stage hinzufügen für neue Bereiche des Spieles
-    //Wenn neue Berreiche eingefügt werden sollen wo alte/akutelle Objecte
-    //ausgeblendet werden sollen so machen wie in der protected void paintComponent(Graphics g) von dieser Klasse
+    //State hinzufügen für neue Bereiche des Spieles
+    //Siehe protected void paintComponent(Graphics g) und public void actionPerformed(ActionEvent e) um zu erfahren wie neue States im Spiel aufgebaut sind.
 
     public Game() {
 
@@ -37,37 +36,39 @@ public class Game extends JPanel implements ActionListener {
         startButton.setClickable(true);
         startButton.setGamestate(GameState.MENU);
 
-        addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                for (GameObject obj : GameObject.getAllObjects()) {
-                    if (obj.isPlayable()  && obj.getGamestate() == currentState) {
 
-                        obj.setMoveDirection(e.getKeyCode(),true);
-                    }
-                }
-            }
 
-            @Override
-            public void keyReleased(KeyEvent e) {
-                for (GameObject obj : GameObject.getAllObjects()) {
-                    if (obj.isPlayable()  && obj.getGamestate() == currentState) {
-                        obj.setMoveDirection(e.getKeyCode(),false);
+                //Key and Mouse Listener
+                addKeyListener(new KeyAdapter() {
+                    @Override
+                    public void keyPressed(KeyEvent e) {
+                        for (GameObject obj : GameObject.getAllObjects()) {
+                            if (obj.isPlayable()  && obj.getGamestate() == currentState) {
+                                obj.setMoveDirection(e.getKeyCode(),true);
+                            }
+                        }
                     }
-                }
-            }
-        });
 
-        addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                for (GameObject obj : GameObject.getAllObjects()) {
-                    if (obj.checkIfClicked(e) && obj.isClicked() && obj.getGamestate() == currentState) {
-                        System.out.println(obj + " wurde geklickt");
+                    @Override
+                    public void keyReleased(KeyEvent e) {
+                        for (GameObject obj : GameObject.getAllObjects()) {
+                            if (obj.isPlayable()  && obj.getGamestate() == currentState) {
+                                obj.setMoveDirection(e.getKeyCode(),false);
+                            }
+                        }
                     }
-                }
-            }
-        });
+                });
+
+                addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        for (GameObject obj : GameObject.getAllObjects()) {
+                            if (obj.checkIfClicked(e) && obj.isClicked() && obj.getGamestate() == currentState) {
+                                System.out.println(obj + " wurde geklickt");
+                            }
+                        }
+                    }
+                });
 
 
         this.setFocusable(true);
@@ -87,8 +88,7 @@ public class Game extends JPanel implements ActionListener {
                 currentState = GameState.IN_GAME;
                 startButton.setClickable(false);
                 exitButton.setClickable(false);
-                System.out.println(exitButton.getGamestate());
-                System.out.println(currentState);
+
             }
             if(exitButton.isClicked()) {
                 exitButton.setClicked(false);
