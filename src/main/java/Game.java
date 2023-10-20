@@ -10,8 +10,18 @@ public class Game extends JPanel implements ActionListener {
     public static GameObject startButton;
     public static int frameWidth=500;
     public static int frameHeight=100;
-
     public static JFrame frame;
+    public GameState currentState;
+
+
+    //Stage hinzufügen für neue Bereiche des Spieles
+    //Wenn neue Berreiche eingefügt werden sollen wo alte/akutelle Objecte ausgeblendet werden sollen so machen wie in der
+    //protected void paintComponent(Graphics g) von dieser Klasse
+    public enum GameState {
+        MENU, // Menü anzeigen
+        IN_GAME, // Spiel ist aktiv
+        GAME_OVER // Spiel ist beendet
+    }
 
     public Game() {
 
@@ -22,11 +32,14 @@ public class Game extends JPanel implements ActionListener {
         this.setPreferredSize(new Dimension(x, y));
         this.timer = new Timer(16, this);  // 60 FPS
 
+        currentState = GameState.MENU;
+
 
         exitButton = new GameObject(200, 200, 400, 400, "src/main/java/Images/ExitBUTTON.png", true);
         startButton = new GameObject(1100, 200, 400, 400, "src/main/java/Images/StartBUTTON.png", true);
         exitButton.setClickable(true);
         startButton.setClickable(true);
+
 
 
         addKeyListener(new KeyAdapter() {
@@ -71,9 +84,13 @@ public class Game extends JPanel implements ActionListener {
         }
 
 
-        if(startButton.isClicked()) {
+        if (startButton.isClicked()) {
             startButton.setClicked(false);
+            currentState = GameState.IN_GAME; // Wechsel zum Spielzustand
+        }
 
+        if (currentState == GameState.GAME_OVER) {
+            currentState = GameState.MENU; // Zurück zum Menü
         }
 
         repaint();
@@ -83,8 +100,14 @@ public class Game extends JPanel implements ActionListener {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        startButton.draw(g,this);
-        exitButton.draw(g,this);
+        if (currentState == GameState.MENU) {
+            startButton.draw(g, this);
+            exitButton.draw(g, this);
+        } else if (currentState == GameState.IN_GAME) {
+
+        } else if (currentState == GameState.GAME_OVER) {
+
+        }
     }
 
     public static void main(String[] args) {
