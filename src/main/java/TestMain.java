@@ -36,9 +36,8 @@ public class TestMain extends JPanel implements ActionListener {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                for (GameObject obj : GameObject.getAllObjects()) { // Annahme, dass eine solche Methode existiert
+                for (GameObject obj : GameObject.getAllObjects()) {
                     if (obj.checkIfClicked(e) && obj.isClicked()) {
-                        // Dein Code hier, z.B.
                         System.out.println(obj + " wurde geklickt");
 
                     }

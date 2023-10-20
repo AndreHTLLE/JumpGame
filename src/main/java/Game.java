@@ -37,28 +37,33 @@ public class Game extends JPanel implements ActionListener {
         startButton.setClickable(true);
         startButton.setGamestate(GameState.MENU);
 
-
-
         addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
-                //goblinJumping.setMoveDirection(e.getKeyCode(), true);
+                for (GameObject obj : GameObject.getAllObjects()) {
+                    if (obj.isPlayable()  && obj.getGamestate() == currentState) {
+
+                        obj.setMoveDirection(e.getKeyCode(),true);
+                    }
+                }
             }
 
             @Override
             public void keyReleased(KeyEvent e) {
-               // goblinJumping.setMoveDirection(e.getKeyCode(), false);
+                for (GameObject obj : GameObject.getAllObjects()) {
+                    if (obj.isPlayable()  && obj.getGamestate() == currentState) {
+                        obj.setMoveDirection(e.getKeyCode(),false);
+                    }
+                }
             }
         });
 
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                for (GameObject obj : GameObject.getAllObjects()) { // Annahme, dass eine solche Methode existiert
+                for (GameObject obj : GameObject.getAllObjects()) {
                     if (obj.checkIfClicked(e) && obj.isClicked() && obj.getGamestate() == currentState) {
-                        // Dein Code hier, z.B.
                         System.out.println(obj + " wurde geklickt");
-
                     }
                 }
             }
@@ -75,23 +80,39 @@ public class Game extends JPanel implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
 
-        if(exitButton.isClicked() && exitButton.getGamestate() == GameState.MENU) {
-            exitButton.setClicked(false);
-            System.exit(0);
+        if(currentState == GameState.MENU) {
+
+            if(startButton.isClicked()) {
+                startButton.setClicked(false);
+                currentState = GameState.IN_GAME;
+                startButton.setClickable(false);
+                exitButton.setClickable(false);
+                System.out.println(exitButton.getGamestate());
+                System.out.println(currentState);
+            }
+            if(exitButton.isClicked()) {
+                exitButton.setClicked(false);
+                System.exit(0);
+            }
+
+            /*for (GameObject obj : GameObject.getAllObjects()) {
+                if (obj.isPlayable()  && obj.getGamestate() == currentState) {
+                    obj.updatePosition();
+                }
+            }*/
         }
 
+        if(currentState == GameState.IN_GAME) {
 
-        if (startButton.isClicked() && startButton.getGamestate() == GameState.MENU) {
-            startButton.setClicked(false);
-            currentState = GameState.IN_GAME; // Wechsel zum Spielzustand
-            startButton.setClickable(false);
-            exitButton.setClickable(false);
-            System.out.println(exitButton.getGamestate());
-            System.out.println(currentState);
+            for (GameObject obj : GameObject.getAllObjects()) {
+                if (obj.isPlayable()  && obj.getGamestate() == currentState) {
+                    obj.updatePosition();
+                }
+            }
         }
 
-        if (currentState == GameState.GAME_OVER) {
-            currentState = GameState.MENU; // Zurück zum Menü
+        if(currentState == GameState.GAME_OVER) {
+
         }
 
         repaint();

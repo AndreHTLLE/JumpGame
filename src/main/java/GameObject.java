@@ -272,8 +272,11 @@ public class GameObject {
     public GameState getGamestate() {
         return gamestate;
     }
+    public boolean isPlayable() {
+        return playable;
+    }
 }
-
+                    //Old
 /* public HitDirection move(int dx, int dy) {
         int newX = x + dx;
         int newY = y + dy;
