@@ -12,6 +12,7 @@ public class GameObject {
     private int hitboxWidth, hitboxHeight;
     private boolean passable;
     private Image image;
+    private String imagePath;
     private boolean showHitbox;
     private boolean playable;
     private int speed;
@@ -21,16 +22,11 @@ public class GameObject {
     private boolean moveRight = false;
     private boolean clickable; // Neues Feld, um festzustellen, ob das Objekt anklickbar ist
     private boolean clicked;
+
+    private GameState gamestate;
     private ArrayList<GameObject> nearbyObjects  = new ArrayList<>();
     private static ArrayList<GameObject> allObjects = new ArrayList<>();
 
-    public enum HitDirection {
-        NONE, // Keine Kollision
-        LEFT, // Kollision von der linken Seite
-        RIGHT, // Kollision von der rechten Seite
-        UP, // Kollision von oben
-        DOWN; // Kollision von unten
-    }
 
     public GameObject(int x, int y, int width, int height, String imagePath, boolean passable) {
         this(x, y, width, height, width, height, imagePath, passable, false);
@@ -50,10 +46,12 @@ public class GameObject {
         this.hitboxHeight = hitboxHeight;
         this.passable = passable;
         this.image = new ImageIcon(imagePath).getImage();
+        this.imagePath = imagePath;
         this.showHitbox = showHitbox;
         this.playable = false;
         this.speed = 5;
         this.clickable = false;
+        this.gamestate = GameState.NONE;
         allObjects.add(this);
     }
 
@@ -254,14 +252,25 @@ public class GameObject {
 
     @Override
     public String toString() {
+        String fileName = imagePath.substring(imagePath.lastIndexOf("/") + 1);
+
         return "GameObject{" +
                 "x=" + x +
                 ", y=" + y +
                 ", width=" + width +
                 ", height=" + height +
                 ", passable=" + passable +
-                ", image=" + image +
+                ", ImageData=" + image +
+                ", ImageName=" + fileName +
                 '}';
+    }
+
+    public void setGamestate(GameState gamestate) {
+        this.gamestate = gamestate;
+    }
+
+    public GameState getGamestate() {
+        return gamestate;
     }
 }
 

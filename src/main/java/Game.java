@@ -11,17 +11,12 @@ public class Game extends JPanel implements ActionListener {
     public static int frameWidth=500;
     public static int frameHeight=100;
     public static JFrame frame;
-    public GameState currentState;
+    public static GameState currentState;
 
-
+                    //GameState Enum
     //Stage hinzufügen für neue Bereiche des Spieles
-    //Wenn neue Berreiche eingefügt werden sollen wo alte/akutelle Objecte ausgeblendet werden sollen so machen wie in der
-    //protected void paintComponent(Graphics g) von dieser Klasse
-    public enum GameState {
-        MENU, // Menü anzeigen
-        IN_GAME, // Spiel ist aktiv
-        GAME_OVER // Spiel ist beendet
-    }
+    //Wenn neue Berreiche eingefügt werden sollen wo alte/akutelle Objecte
+    //ausgeblendet werden sollen so machen wie in der protected void paintComponent(Graphics g) von dieser Klasse
 
     public Game() {
 
@@ -35,10 +30,12 @@ public class Game extends JPanel implements ActionListener {
         currentState = GameState.MENU;
 
 
-        exitButton = new GameObject(200, 200, 400, 400, "src/main/java/Images/ExitBUTTON.png", true);
-        startButton = new GameObject(1100, 200, 400, 400, "src/main/java/Images/StartBUTTON.png", true);
+        exitButton = new GameObject(200, 200, 400, 400, "src/main/java/Images/ExitBUTTON.png", true,true);
+        startButton = new GameObject(1100, 200, 400, 400, "src/main/java/Images/StartBUTTON.png", true,true);
         exitButton.setClickable(true);
+        exitButton.setGamestate(GameState.MENU);
         startButton.setClickable(true);
+        startButton.setGamestate(GameState.MENU);
 
 
 
@@ -58,7 +55,7 @@ public class Game extends JPanel implements ActionListener {
             @Override
             public void mouseClicked(MouseEvent e) {
                 for (GameObject obj : GameObject.getAllObjects()) { // Annahme, dass eine solche Methode existiert
-                    if (obj.checkIfClicked(e) && obj.isClicked()) {
+                    if (obj.checkIfClicked(e) && obj.isClicked() && obj.getGamestate() == currentState) {
                         // Dein Code hier, z.B.
                         System.out.println(obj + " wurde geklickt");
 
@@ -78,15 +75,19 @@ public class Game extends JPanel implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
 
-        if(exitButton.isClicked()) {
+        if(exitButton.isClicked() && exitButton.getGamestate() == GameState.MENU) {
             exitButton.setClicked(false);
             System.exit(0);
         }
 
 
-        if (startButton.isClicked()) {
+        if (startButton.isClicked() && startButton.getGamestate() == GameState.MENU) {
             startButton.setClicked(false);
             currentState = GameState.IN_GAME; // Wechsel zum Spielzustand
+            startButton.setClickable(false);
+            exitButton.setClickable(false);
+            System.out.println(exitButton.getGamestate());
+            System.out.println(currentState);
         }
 
         if (currentState == GameState.GAME_OVER) {
@@ -101,12 +102,20 @@ public class Game extends JPanel implements ActionListener {
         super.paintComponent(g);
 
         if (currentState == GameState.MENU) {
-            startButton.draw(g, this);
-            exitButton.draw(g, this);
+            for (GameObject obj : GameObject.getAllObjects()) {
+                if(obj.getGamestate() == GameState.MENU)
+                    obj.draw(g, this);
+            }
         } else if (currentState == GameState.IN_GAME) {
-
+            for (GameObject obj : GameObject.getAllObjects()) {
+                if(obj.getGamestate() == GameState.IN_GAME)
+                    obj.draw(g, this);
+            }
         } else if (currentState == GameState.GAME_OVER) {
-
+            for (GameObject obj : GameObject.getAllObjects()) {
+                if(obj.getGamestate() == GameState.GAME_OVER)
+                    obj.draw(g, this);
+            }
         }
     }
 
