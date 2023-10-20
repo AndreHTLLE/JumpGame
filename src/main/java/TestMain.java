@@ -12,9 +12,9 @@ public class TestMain extends JPanel implements ActionListener {
         this.timer = new Timer(16, this);  // 60 FPS
 
         // Erstelle GameObjects
-        goblinJumping = new GameObject(100, 100, 50, 50, "/Users/andre/Downloads/JumpGame/JumpGame/src/main/java/Images/goblin_jumping.png", true, true);
+        goblinJumping = new GameObject(100, 100, 50, 50, "src/main/java/Images/goblin_jumping.png", true, true);
         goblinJumping.setHitboxDimensions(23,23);
-        goblinFalling = new GameObject(200, 200, 50, 50, "/Users/andre/Downloads/JumpGame/JumpGame/src/main/java/Images/wolke.png", false, true);
+        goblinFalling = new GameObject(200, 200, 50, 50, "src/main/java/Images/wolke.png", false, true);
 
         goblinFalling.setClickable(true);
         goblinJumping.setPlayable(true);
