@@ -1,6 +1,5 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.image.ImageObserver;
@@ -179,18 +178,10 @@ public class GameObject {
     public void setMoveDirection(int key, boolean isPressed) {
         if (playable) {
             switch (key) {
-                case KeyEvent.VK_W:
-                    moveUp = isPressed;
-                    break;
-                case KeyEvent.VK_S:
-                    moveDown = isPressed;
-                    break;
-                case KeyEvent.VK_A:
-                    moveLeft = isPressed;
-                    break;
-                case KeyEvent.VK_D:
-                    moveRight = isPressed;
-                    break;
+                case KeyEvent.VK_W -> moveUp = isPressed;
+                case KeyEvent.VK_S -> moveDown = isPressed;
+                case KeyEvent.VK_A -> moveLeft = isPressed;
+                case KeyEvent.VK_D -> moveRight = isPressed;
             }
         }
     }
