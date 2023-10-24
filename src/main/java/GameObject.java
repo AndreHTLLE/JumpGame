@@ -19,7 +19,7 @@ public class GameObject {
     private boolean moveDown = false;
     private boolean moveLeft = false;
     private boolean moveRight = false;
-    private boolean clickable; // Neues Feld, um festzustellen, ob das Objekt anklickbar ist
+    private boolean clickable;
     private boolean clicked;
 
     private GameState gamestate;
