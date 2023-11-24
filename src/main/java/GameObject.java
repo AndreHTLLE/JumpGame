@@ -200,6 +200,13 @@ public class GameObject {
         return false;
     }
 
+    public int getXDistance(GameObject other) {
+        return this.x - other.x;
+    }
+    public int getYDistance(GameObject other) {
+        return this.y - other.y;
+    }
+
     public static ArrayList<GameObject> getAllObjects() {
         return allObjects;
     }
