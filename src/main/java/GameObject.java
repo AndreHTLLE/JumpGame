@@ -6,7 +6,25 @@ import java.awt.image.ImageObserver;
 import java.util.ArrayList;
 
 public class GameObject {
-    private int x, y;
+    private int x;
+
+    public int getX() {
+        return x;
+    }
+
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public void setY(int y) {
+        this.y = y;
+    }
+
+    private int y;
     private int width, height;
     private int hitboxWidth, hitboxHeight;
     private boolean passable;
@@ -21,12 +39,38 @@ public class GameObject {
     private boolean moveRight = false;
     private boolean clickable;
     private boolean clicked;
+    private boolean hasGravity;
+    private HitDirection hitDirection;
+    private String objectName;
+    private String colldingObjectName;
+    private GameObject collidingObject;
+    private boolean allHitBoxes;
+
+    private int gravity = 8; // Schwerkraftkonstante
+    private boolean hasJumped = false;
+    private float jumpTimer = 0.0f; // Timer für die Dauer des Sprungs
+    private float maxJumpTime = 0.5f; // Maximale Dauer des Sprungs in Sekunden
+    private float passableTimer = 0.0f;
+
 
     private GameState gamestate;
     private ArrayList<GameObject> nearbyObjects  = new ArrayList<>();
     private static ArrayList<GameObject> allObjects = new ArrayList<>();
 
 
+    public void setObjectName(String name) {
+        this.objectName = name;
+    }
+    public String getObjectName(){
+        return this.objectName;
+    }
+    public String getColldingObjectName(){
+        if(this.colldingObjectName != null) {
+            return this.colldingObjectName;
+        } else {
+            return "NoName";
+        }
+    }
     public GameObject(int x, int y, int width, int height, String imagePath, boolean passable) {
         this(x, y, width, height, width, height, imagePath, passable, false);
     }
@@ -53,6 +97,20 @@ public class GameObject {
         allObjects.add(this);
     }
 
+    // Methode zum Aktualisieren des Timers
+    public void updatePassableTimer(float deltaTime) {
+        if (passableTimer > 0) {
+            passableTimer -= deltaTime;
+            if (passableTimer <= 0) {
+                setPassable(false); // Macht das Objekt wieder undurchlässig
+            }
+        }
+    }
+
+    // Setter für den Timer
+    public void setPassableTimer(float time) {
+        this.passableTimer = time;
+    }
     public void draw(Graphics g, ImageObserver obs) {
         g.drawImage(image, x, y, width, height, obs);
 
@@ -98,8 +156,16 @@ public class GameObject {
         } else if (yDirection != HitDirection.NONE) {
             hitDirection = yDirection;
         }
-
+        this.hitDirection = hitDirection;
         return hitDirection;
+    }
+
+    public GameObject getCollidingObject() {
+        return collidingObject;
+    }
+
+    public void setCollidingObject(GameObject collidingObject) {
+        this.collidingObject = collidingObject;
     }
 
     private HitDirection checkCollision(int newX, int newY, int dx, int dy) {
@@ -111,7 +177,11 @@ public class GameObject {
             if (newBounds.intersects(objBounds)) {
                 if (!obj.passable) {
                     adjustPosition(objBounds, dx, dy);
+                    this.colldingObjectName = obj.getObjectName();
+                    System.out.print(this.getObjectName() + " Colliding: " + colldingObjectName +" ");
+                    this.collidingObject = obj;
                     return calculateHitDirection(newBounds, objBounds);
+
                 }
             }
         }
@@ -135,6 +205,7 @@ public class GameObject {
         } else if (minDistance == distanceToTop) {
             return HitDirection.DOWN;
         } else if (minDistance == distanceToBottom) {
+            this.hasJumped = false;
             return HitDirection.UP;
         } else {
             return HitDirection.NONE;
@@ -156,23 +227,53 @@ public class GameObject {
     }
 
     public void updatePosition() {
+        int dx = 0, dy = 0;
         if (playable) {
-            int dx = 0, dy = 0;
-            if (moveUp) {
-                dy -= speed;
-            }
-            if (moveDown) {
-                dy += speed;
-            }
             if (moveLeft) {
                 dx -= speed;
             }
             if (moveRight) {
                 dx += speed;
             }
+
+            if (!hasGravity || (hasGravity && !hasJumped)) {
+                if (moveUp && !hasGravity) {
+                   dy -= speed;
+                }
+                if (moveDown) {
+                    dy += speed;
+                }
+            }
+            if (hasGravity) {
+                // Starte den Sprung, wenn die Bedingung erfüllt ist
+                if (moveUp && this.hitDirection == HitDirection.UP && !hasJumped) {
+                    this.hasJumped = true;
+                    jumpTimer = maxJumpTime;
+                }
+
+                // Aktualisiere die Sprungdynamik
+                if (hasJumped) {
+                    if (jumpTimer > 0) {
+                        // Während des Sprungs
+                        dy -= (int)(speed * jumpTimer * 5); // Sprunghöhe basierend auf dem Timer
+                        jumpTimer -= 0.05; // Reduziere den Timer
+                    } else {
+                        // Wenn der Sprung beendet ist
+                        hasJumped = false;
+                    }
+                }
+
+                dy += gravity; // Füge Schwerkraft hinzu
+            }
+
+            // Bewege das Objekt
             System.out.println(move(dx, dy));
+        } else if(hasGravity){
+            dy += speed;
+            move(dx,dy);
         }
     }
+
 
 
     public void setMoveDirection(int key, boolean isPressed) {
@@ -199,12 +300,27 @@ public class GameObject {
         }
         return false;
     }
+    public void forceJump(float jumpDuration) {
+        if (hasGravity) {
+            this.hasJumped = true;
+            this.jumpTimer = jumpDuration;
+        }
+    }
 
+    public void setJumpTime(float i) {
+        this.maxJumpTime  = i;
+    }
+    public void setColldingObjectName(String name) {
+        this.colldingObjectName = name;
+    }
+    public float getJumpTime() {
+        return this.maxJumpTime;
+    }
     public int getXDistance(GameObject other) {
         return this.x - other.x;
     }
     public int getYDistance(GameObject other) {
-        return this.y - other.y;
+            return this.y - other.y;
     }
 
     public static ArrayList<GameObject> getAllObjects() {
@@ -231,12 +347,28 @@ public class GameObject {
         // Setter für die Steuerbarkeit
         this.playable = playable;
     }
+    public void setGravity(boolean gravity) {
+        this.hasGravity = gravity;
+    }
+    public boolean hasGravity() {
+        return this.hasGravity;
+    }
     public boolean isClicked() {
         return clicked;
     }
 
+    public void setPassable(Boolean passable) {
+        this.passable = passable;
+    }
     public void setClicked(boolean clicked) {
         this.clicked = clicked;
+    }
+
+    public void setGravity(int gravity) {
+        this.gravity = gravity;
+    }
+    public int getGravity() {
+        return this.gravity;
     }
 
     public boolean isClickable() {
@@ -245,6 +377,9 @@ public class GameObject {
 
     public void setClickable(boolean clickable) {
         this.clickable = clickable;
+    }
+    public HitDirection getHitDirection() {
+        return this.hitDirection;
     }
 
     @Override
@@ -262,6 +397,10 @@ public class GameObject {
                 '}';
     }
 
+    public void remove() {
+        this.setGamestate(GameState.NONE);
+        this.move(2000,2000);
+    }
     public void setGamestate(GameState gamestate) {
         this.gamestate = gamestate;
     }
@@ -271,6 +410,45 @@ public class GameObject {
     }
     public boolean isPlayable() {
         return playable;
+    }
+
+    public boolean isPassable() {
+        return this.passable;
+    }
+
+    public float getPassableTimer() {
+        return this.passableTimer;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public void setWidth(int width) {
+        this.width = width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public void setHeight(int height) {
+        this.height = height;
+    }
+    public void setShowHitbox(Boolean showHitbox) {
+        this.showHitbox = showHitbox;
+    }
+    public void showAllHitBoxes(Boolean onOff) {
+        this.allHitBoxes = onOff;
+        if(allHitBoxes) {
+            for(GameObject gameObject : GameObject.getAllObjects()) {
+                gameObject.setShowHitbox(true);
+            }
+        } else {
+            for(GameObject gameObject : GameObject.getAllObjects()) {
+                gameObject.setShowHitbox(false);
+            }
+        }
     }
 }
                     //Old
