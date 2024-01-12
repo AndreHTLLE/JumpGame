@@ -27,19 +27,30 @@ public class Game extends JPanel implements ActionListener {
     public Random rand = new Random();
     public static ArrayList<GameObject> clouds = new ArrayList<>();
     private static HashMap<GameObject, GameObject> cloudMapping = new HashMap<>();
+    public static Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 
+    public static int score = 0;
+    public static int Highscore = 0;
+    public static JLabel scoreLabel = new JLabel("Score: ");
+    public static JLabel HighScoreLabel = new JLabel("HighScore: ");
+    public static int x;
+    public static int y;
+    public static int speed = 1;
                     //GameState Enum
     //State hinzufügen für neue Bereiche des Spieles
     //Siehe protected void paintComponent(Graphics g) und public void actionPerformed(ActionEvent e) um zu erfahren wie neue States im Spiel aufgebaut sind.
 
     public Game() {
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 
-        int x = (int) ((screenSize.getWidth()));
-        int y = (int) ((screenSize.getHeight()));
+        int xCoord = (int) ((screenSize.getWidth()));
+        x = xCoord;
+        int yCoord = (int) ((screenSize.getHeight()));
+        y = yCoord;
         this.setPreferredSize(new Dimension(x, y));
         this.timer = new Timer(16, this);  // 60 FPS
 
+        this.add(scoreLabel);
+        this.add(HighScoreLabel);
 
         currentState = GameState.MENU;
 
@@ -63,14 +74,29 @@ public class Game extends JPanel implements ActionListener {
         ground2 = new GameObject(0,y-285, x, 100, "", false, true);
         ground2.setGamestate(GameState.IN_GAME);
         ground2.setObjectName("Ground");
-        slime = new GameObject(50, 50, 80,80,"src/main/java/Images/slime.png", true,true);
+        slime = new GameObject((x+100)/2, -100, 80,80,"src/main/java/Images/slime.png", true,true);
         slime.setHitboxDimensions(80,25);
         slime.setGamestate(GameState.IN_GAME);
         slime.setPlayable(true);
         slime.setSpeed(15);
         slime.setGravity(true);
-        slime.setJumpTime(1f);
+        slime.setJumpTime(0.8f);
         slime.setObjectName("Slime");
+
+        GameObject cloud = new GameObject((x+100)/2, 30, 150, 150, "src/main/Java/Images/wolke.png", false, true);
+        cloud.setObjectName("Wolke");
+        cloud.setGravity(true);
+        cloud.setGamestate(GameState.IN_GAME);
+
+        GameObject cloudBorder = new GameObject((x+100)/2, -29 + 150, 150, 20, "", false, true);
+        cloudBorder.setObjectName("WolkeBorder");
+        cloudBorder.setGravity(true);
+        cloudBorder.setGamestate(GameState.IN_GAME);
+
+        cloudMapping.put(cloudBorder, cloud);
+
+        clouds.add(cloud);
+        clouds.add(cloudBorder);
 
         leftBorder = new GameObject(-10,0,10,y, "src/main/java/Images/ground.png",false, true);
         leftBorder.setGamestate(GameState.IN_GAME);
@@ -129,6 +155,9 @@ public class Game extends JPanel implements ActionListener {
     public void actionPerformed(ActionEvent e) {
 
         slime.showAllHitBoxes(false);
+        scoreLabel.setBounds(700,40,200,200);
+        scoreLabel.setAlignmentX(2);
+        HighScoreLabel.setBounds(900,40,200,200);
         if(currentState == GameState.MENU) {
 
             if(startButton.isClicked()) {
@@ -150,6 +179,12 @@ public class Game extends JPanel implements ActionListener {
         }
 
         if(currentState == GameState.IN_GAME) {
+            this.remove(scoreLabel);
+            score++;
+            scoreLabel.setBounds(x-200, 60,200,200);
+            scoreLabel.setText("Score: "+ score);
+            this.add(scoreLabel);
+            this.remove(HighScoreLabel);
             for (GameObject obj : GameObject.getAllObjects()) {
                 if (obj.isPlayable() && obj.getGamestate() == currentState) {
                     obj.updatePosition();
@@ -161,9 +196,20 @@ public class Game extends JPanel implements ActionListener {
                 currentState = GameState.MENU;
                 startButton.setClickable(true);
                 exitButton.setClickable(true);
+                this.add(scoreLabel);
+                this.add(HighScoreLabel);
+            }
+            if(slime.getColldingObjectName().equals("Ground")) {
+                currentState = GameState.GAME_OVER;
             }
 
-            if(counter > 120) {
+            if(counter == 60) {
+                createClouds();
+            }
+            if(counter == 120) {
+                createClouds();
+            }
+            if(counter == 180) {
                 createClouds();
                 counter = 0;
             }
@@ -202,21 +248,78 @@ public class Game extends JPanel implements ActionListener {
 
         if(currentState == GameState.GAME_OVER) {
 
+
+            int x = (int) ((screenSize.getWidth()));
+            this.remove(scoreLabel);
+            slime.remove();
+            slime = new GameObject((x+100)/2, -100, 80,80,"src/main/java/Images/slime.png", true,true);
+            slime.setHitboxDimensions(80,25);
+            slime.setGamestate(GameState.IN_GAME);
+            slime.setPlayable(true);
+            slime.setSpeed(15);
+            slime.setGravity(true);
+            slime.setJumpTime(0.8f);
+            slime.setObjectName("Slime");
+            menuButton.setClicked(false);
+            currentState = GameState.MENU;
+            startButton.setClickable(true);
+            exitButton.setClickable(true);
+            scoreLabel.setText("Score: " + score);
+            this.add(scoreLabel);
+            if(this.score > this.Highscore) {
+                this.Highscore = this.score;
+            }
+            HighScoreLabel.setText("HighScore: " + Highscore);
+            this.add(HighScoreLabel);
+            score=0;
+            Iterator<GameObject> iterator = clouds.iterator();
+            while(iterator.hasNext()) {
+                GameObject gameObject = iterator.next();
+                gameObject.updatePosition();
+
+                gameObject.remove();
+                iterator.remove();
+
+            }
+
+
+
+            GameObject cloud = new GameObject((x+100)/2, 30, 150, 150, "src/main/Java/Images/wolke.png", false, true);
+            cloud.setObjectName("Wolke");
+            cloud.setGravity(true);
+            cloud.setGamestate(GameState.IN_GAME);
+
+            GameObject cloudBorder = new GameObject((x+100)/2, -29 + 150, 150, 20, "", false, true);
+            cloudBorder.setObjectName("WolkeBorder");
+            cloudBorder.setGravity(true);
+            cloudBorder.setGamestate(GameState.IN_GAME);
+
+            cloudMapping.put(cloudBorder, cloud);
+
+            clouds.add(cloud);
+            clouds.add(cloudBorder);
+
+            System.out.println(startButton.getGamestate());
+
+
         }
 
         repaint();
     }
     public void createClouds() {
         int i = rand.nextInt(1000);
-        GameObject cloud = new GameObject(i, -20, 150, 150, "src/main/Java/Images/wolke.png", false, true);
+        GameObject cloud = new GameObject(i+100, -20, 150, 150, "src/main/Java/Images/wolke.png", false, false);
         cloud.setObjectName("Wolke");
         cloud.setGravity(true);
+
         cloud.setGamestate(GameState.IN_GAME);
 
-        GameObject cloudBorder = new GameObject(i, -19 + 150, 150, 20, "", true, true);
+        GameObject cloudBorder = new GameObject(i+100, -18 + 150, 150, 20, "", true, false);
         cloudBorder.setObjectName("WolkeBorder");
         cloudBorder.setGravity(true);
+
         cloudBorder.setGamestate(GameState.IN_GAME);
+        System.out.println(speed);
 
         cloudMapping.put(cloudBorder, cloud); // Speichert die Verknüpfung in der HashMap
 

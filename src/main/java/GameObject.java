@@ -262,10 +262,8 @@ public class GameObject {
                         hasJumped = false;
                     }
                 }
-
                 dy += gravity; // Füge Schwerkraft hinzu
             }
-
             // Bewege das Objekt
             System.out.println(move(dx, dy));
         } else if(hasGravity){
